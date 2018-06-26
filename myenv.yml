@@ -12,4 +12,3 @@ dependencies:
   - keras=2.1.6
   - pip:
     - tensorflow-gpu==1.8
-    -
