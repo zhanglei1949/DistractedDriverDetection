@@ -6,7 +6,6 @@ Deep Learning and Computer Vision to detect distracted drivers
 
 This project is optimized to run on a GPU. I use the Google Cloud Platform with a Tesla K80 for this project
 
-# Setup
 * [Download the data](https://www.kaggle.com/c/state-farm-distracted-driver-detection/data)
 
 * Create the environment:
