@@ -23,6 +23,23 @@ There are 10 classes to predict:
 
 ### Explanation of my work
 
+I used a pre-trained VGG-16 Convolutional Neural Network as a base layer. I then removed the last layer (=top layer) and added a Dense layer with a softmax to output the classification. The optimization algorithm is Adam with a small learning rate: **/tofill/**  . 
+
+
+The used the weights trained VGG-16 on the image-net dataset. All the layers beside the last **/tofill/**  were frozen. I fine tuned the model using the training set and a validation set (25% split)
+
+
+**/tofill/** epochs were used. The learning_rate, number of epochs and numbers of layers to freeze values were determined by several experiments, not shown here. 
+
+
+#### Train
+
+Run the notebook `main_training`. It will save a trained model under the folder `Model/`
+
+#### Predict
+Use the script `predict.py [Model/model_name]` to obtain prediction and generate a .csv file for Kaggle.
+
+
 # Setup
 
 This project is optimized to run on a GPU. I use the Google Cloud Platform with a Tesla K80 for this project
@@ -40,5 +57,3 @@ This project is optimized to run on a GPU. I use the Google Cloud Platform with 
 
     - To update:
     `conda env update -f myenv.yml`
-
-* Run the notebook `main.ipynb`
