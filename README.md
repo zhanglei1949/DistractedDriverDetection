@@ -52,7 +52,7 @@ This project is optimized to run on a GPU. I use the Google Cloud Platform with 
     
 ### Train
 
-Run the notebook `main_training`. It will save a trained model under the folder `Model/`
+Run the notebook `main_training`. It will save a trained model under the folder `Model/`.
 
 ### Predict
-Use the script `predict.py [Model/model_name]` to obtain prediction and generate a .csv file for Kaggle.
+Use the script `predict.py [Model/model_name]` to obtain prediction and generate a .csv file for Kaggle under the folder `Output/`.
