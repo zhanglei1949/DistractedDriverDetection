@@ -9,6 +9,7 @@ import pandas as pd
 import cv2
 import os 
 import glob
+import datetime
 import sys
 from joblib import Parallel, delayed
 import numpy as np
@@ -24,10 +25,9 @@ def load_image(img_file, img_reshape_size):
     Return:
     - img: openCV image
     """   
-    
     img = cv2.imread(img_file)
     img = cv2.resize(img, img_reshape_size)
-        # Preprocess input according to VGG16
+    # Preprocess input according to VGG16
     vgg16.preprocess_input(img)
     return img
 
@@ -48,15 +48,16 @@ def load_test_dataset(dataset_dir, img_reshape_size, nprocs=10):
     
     # Test dataset
     path = os.path.join(dataset_dir, '*.jpg')
-    files = glob.glob(path)
-    
-    X_id.extend([im_file] for im_file in files)
-    X.extend(Parallel(n_jobs=nprocs)(delayed(load_image)(im_file, img_reshape_size) for im_file in files))
+    file_paths = glob.glob(path)
+    file_names = os.listdir(dataset_dir)
+
+    X_id.extend([im_file] for im_file in file_names)
+    X.extend(Parallel(n_jobs=nprocs)(delayed(load_image)(im_file, img_reshape_size) for im_file in file_paths))
     print('folder test loaded')
 
     X = np.array(X)
     y = np.array(y)
-    X_id = np.array(X_id)
+    X_id = np.array(X_id).flatten()
     return X, y, X_id
 
 def create_submission(predictions, test_id, info):
@@ -68,18 +69,23 @@ def create_submission(predictions, test_id, info):
     Return:
     /
     """    
-    result = pd.DataFrame(predictions, columns=['c0', 'c1', 'c2', 'c3',
-                                                 'c4', 'c5', 'c6', 'c7',
-                                                 'c8', 'c9'])
-    result.loc[:, 'img'] = pd.Series(test_id, index=result1.index)
+    result = pd.DataFrame(predictions, columns=['c0', 'c1', 'c2', 'c3','c4', 
+                                                'c5', 'c6', 'c7','c8', 'c9'])
+    result.loc[:, 'img'] = pd.Series(test_id, index=result.index)
+    
     now = datetime.datetime.now()
     if not os.path.isdir('Output'):
         os.mkdir('Output')
+        
+    # extract only name of the model
+    info = info.split('/')[1].split('.h5')[0]
+    
     filename = info + '_' + str(now.strftime("%Y-%m-%d-%H-%M"))
-    sub_file = os.path.join('Output', 'submission_' + filename + '.csv')
+    sub_file = os.path.join('Output', 'submission-' + filename + '.csv')
     result.to_csv(sub_file, index=False)
     print('File', filename, 'saved')
     
+
 if __name__ == '__main__':
     model_info = sys.argv[1]
     print('Working with model', model_info)
