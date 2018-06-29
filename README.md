@@ -68,5 +68,5 @@ Run the notebook `main_training`. It will save a trained model under the folder 
 
 ### Predict
 * Run the last cell of this notebook
-* se the script `predict.py [Model/model_name]` to obtain prediction and generate a .csv file for Kaggle under the folder `Output/`.
+* Or use the script `predict.py [Model/model_name]` to obtain prediction and generate a .csv file for Kaggle under the folder `Output/`.
 
