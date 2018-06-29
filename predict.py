@@ -53,7 +53,6 @@ def load_test_dataset(dataset_dir, img_reshape_size, nprocs=10):
 
     X_id.extend([im_file] for im_file in file_names)
     X.extend(Parallel(n_jobs=nprocs)(delayed(load_image)(im_file, img_reshape_size) for im_file in file_paths))
-    print('folder test loaded')
 
     X = np.array(X)
     y = np.array(y)
@@ -101,7 +100,7 @@ if __name__ == '__main__':
     dataset_dir_test = os.path.join(dataset_dir, 'test')
     print('Load dataset test')
     X_test, y_test, X_test_id = load_test_dataset(dataset_dir_test, img_reshape_size)
-
+    print('Dataset test loaded')
     # Shapes 
     print('X_test shape:', X_test.shape)
     
