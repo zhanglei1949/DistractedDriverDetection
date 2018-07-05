@@ -28,6 +28,7 @@ def load_image(img_file, img_reshape_size):
     img = cv2.imread(img_file)
     img = cv2.resize(img, img_reshape_size)
     # Preprocess input according to VGG16
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     vgg16.preprocess_input(img)
     return img
 
