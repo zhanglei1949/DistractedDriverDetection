@@ -23,18 +23,23 @@ There are 10 classes to predict:
 
 ## Explanation of my work
 
-I used a pre-trained VGG-16 Convolutional Neural Network as a base layer. I then removed the last layer (=top layer) and added a Dense layer with a softmax to output the classification. The optimization algorithm is Adam with a small learning rate: **/tofill/**  . 
+I used a pre-trained VGG-16 Convolutional Neural Network as a base layer. I then removed the last layer (=top layer) and added a Dense layer with a softmax to output the classification. The optimization algorithm is Adam with a small learning rate: 0.0001. 
 
 
-The used the weights trained VGG-16 on the image-net dataset for the initializatzion. All the layers beside the last **/tofill/**  were frozen. I then performed data augmentation because the training set is not big. I fine tuned the model using the training set and a validation set (33% split)
+The used the weights trained VGG-16 on the image-net dataset for the initializatzion. All the layers beside the last 3 layers were frozen (last 3 layers are fully connected layers). I then performed data augmentation because the training set is not big. I fine tuned the model using the training set and a validation set (30% split)
 
 I used the Keras library as much as possible in this project as it allows to prototype quickly and surely. I used the dataflow and datagen functions to load the file and preprocess them while feeding them by batches directly to the model.
 
 
-**/tofill/** epochs were used. The learning_rate, number of epochs and numbers of layers to freeze values were determined by several experiments, not shown here. 
+5 epochs only were used. The learning_rate, number of epochs and numbers of layers to freeze values were determined by several experiments, not shown here. 
 
 
 The framework was run on a Google Cloud Virtual Machine with a Tesla K80 GPU.
+
+### Result:
+* Public Leaderboard: 1.19 (top 40%)
+* Private Leaderboard 0.86562 (top 30%)
+
 
 
 ### Content:
