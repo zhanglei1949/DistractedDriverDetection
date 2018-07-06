@@ -28,9 +28,13 @@ def load_image(img_file, img_reshape_size):
     img = cv2.imread(img_file)
     img = cv2.resize(img, img_reshape_size)
     # Preprocess input according to VGG16
-    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-    vgg16.preprocess_input(img)
+    #img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    #vgg16.preprocess_input(img)
+  
     return img
+
+def process_test_image(img_file, img_reshape_size):
+    return load_image(img_file, img_reshape_size), os.path.basename(img_file)
 
 def load_test_dataset(dataset_dir, img_reshape_size, nprocs=10):
     """Load the images located in the main folder dataset_dir Each class is in a separate subfolder
@@ -40,25 +44,20 @@ def load_test_dataset(dataset_dir, img_reshape_size, nprocs=10):
     - nprocs:Number of processors to use
     Return:
     - X: numpy array with each image data as a row
-    - y: numpy array with each class as an integer for each image
     - X_id: numpy array containing the name of the file corresponding to each row of y and X
     """
     X = []
-    y = []
     X_id = []
     
     # Test dataset
     path = os.path.join(dataset_dir, '*.jpg')
     file_paths = glob.glob(path)
-    file_names = os.listdir(dataset_dir)
 
-    X_id.extend([im_file] for im_file in file_names)
-    X.extend(Parallel(n_jobs=nprocs)(delayed(load_image)(im_file, img_reshape_size) for im_file in file_paths))
-
-    X = np.array(X)
-    y = np.array(y)
-    X_id = np.array(X_id).flatten()
-    return X, y, X_id
+    results = Parallel(n_jobs=nprocs)(delayed(process_test_image)(im_file, 
+                                                          img_reshape_size) for im_file in file_paths)
+    X, X_id = zip(*results)
+    X = np.array(X, dtype=np.float16)
+    return X, X_id
 
 def create_submission(predictions, test_id, info):
     """Create a .csv file for a submission on Kaggle platform. File will be saved in /Output
@@ -89,22 +88,24 @@ def create_submission(predictions, test_id, info):
 if __name__ == '__main__':
     model_info = sys.argv[1]
     print('Working with model', model_info)
-    
-    # Working directories#  
-    dataset_dir = 'Data'
-    dataset_dir_train = os.path.join(dataset_dir, 'train')
 
     # Image sizes - Requirements of the CNN model
     img_reshape_size = (224,224)
     
     # Load test dataset
+    dataset_dir = 'Data'
     dataset_dir_test = os.path.join(dataset_dir, 'test')
     print('Load dataset test')
-    X_test, y_test, X_test_id = load_test_dataset(dataset_dir_test, img_reshape_size)
+    X_test, X_test_id = load_test_dataset(dataset_dir_test, img_reshape_size)
+    X_test[:, :, :, 0] -= 103.939
+    X_test[:, :, :, 1] -= 116.779
+    X_test[:, :, :, 2] -= 123.68
+
     print('Dataset test loaded')
     # Shapes 
     print('X_test shape:', X_test.shape)
-    
+    #X_test=vgg16.preprocess_input(X_test)
+
     # Predict
     model = load_model(model_info)
     y_pred_test = model.predict(X_test, verbose=1)
