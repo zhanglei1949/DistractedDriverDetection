@@ -17,6 +17,7 @@ from sklearn.metrics import log_loss
 from keras.models import load_model
 from keras.applications import vgg16
 
+
 def load_image(img_file, img_reshape_size):
     """Load an image
     Args:
@@ -108,5 +109,5 @@ if __name__ == '__main__':
 
     # Predict
     model = load_model(model_info)
-    y_pred_test = model.predict(X_test, verbose=1)
+    y_pred_test = model.predict(X_test, batch_size=150, verbose=1)
     create_submission(y_pred_test, X_test_id, model_info)
