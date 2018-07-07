@@ -17,6 +17,20 @@ from sklearn.metrics import log_loss
 from keras.models import load_model
 from keras.applications import vgg16
 
+from mlflow import log_metric, log_param, log_artifact
+
+def preprocess_image(img):
+    """Preprocess an image according to VGG16 imagenet requirement (mean substraction)
+    Args:
+    - img: image in BGR format with shape: [w,h,channel]
+    Return:
+    - img: preprocessed image
+    """   
+    img = img.astype(np.float16)
+    img[:, :, 0] -= 103.939
+    img[:, :, 1] -= 116.779
+    img[:, :, 2] -= 123.68  
+    return img
 
 def load_image(img_file, img_reshape_size):
     """Load an image
@@ -28,10 +42,7 @@ def load_image(img_file, img_reshape_size):
     """   
     img = cv2.imread(img_file)
     img = cv2.resize(img, img_reshape_size)
-    # Preprocess input according to VGG16
-    #img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-    #vgg16.preprocess_input(img)
-  
+    img = preprocess_image(img)
     return img
 
 def process_test_image(img_file, img_reshape_size):
@@ -83,12 +94,13 @@ def create_submission(predictions, test_id, info):
     filename = info + '_' + str(now.strftime("%Y-%m-%d-%H-%M"))
     sub_file = os.path.join('Output', 'submission-' + filename + '.csv')
     result.to_csv(sub_file, index=False)
+    log_artifact(sub_file)
     print('File', filename, 'saved')
-    
 
 if __name__ == '__main__':
     model_info = sys.argv[1]
     print('Working with model', model_info)
+    log_param("model_info", model_info)
 
     # Image sizes - Requirements of the CNN model
     img_reshape_size = (224,224)
@@ -96,18 +108,15 @@ if __name__ == '__main__':
     # Load test dataset
     dataset_dir = 'Data'
     dataset_dir_test = os.path.join(dataset_dir, 'test')
-    print('Load dataset test')
+    print('Loading dataset test...')
     X_test, X_test_id = load_test_dataset(dataset_dir_test, img_reshape_size)
-    X_test[:, :, :, 0] -= 103.939
-    X_test[:, :, :, 1] -= 116.779
-    X_test[:, :, :, 2] -= 123.68
 
     print('Dataset test loaded')
+    
     # Shapes 
     print('X_test shape:', X_test.shape)
-    #X_test=vgg16.preprocess_input(X_test)
 
     # Predict
     model = load_model(model_info)
-    y_pred_test = model.predict(X_test, batch_size=150, verbose=1)
+    y_pred_test = model.predict(X_test, verbose=1)
     create_submission(y_pred_test, X_test_id, model_info)
