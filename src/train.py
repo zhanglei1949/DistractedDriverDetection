@@ -34,18 +34,19 @@ import tensorflow as tf
 
 from mlflow import log_metric, log_param, log_artifact
 
-def preprocess_image(img):
+def preprocess_image(img, mode='vgg16'):
     """Preprocess an image according to VGG16 imagenet requirement (mean substraction)
     Args:
     - img: image in BGR format with shape: [w,h,channel]
+    - mode: type of preprocessing wanted according to model requirements
     Return:
     - img: preprocessed image
-    """   
-    img = img.astype(np.float16)
-    img[:, :, 0] -= 103.939
-    img[:, :, 1] -= 116.779
-    img[:, :, 2] -= 123.68
-    
+    """ 
+    if(mode=='vgg16'):
+        img = img.astype(np.float16)
+        img[:, :, 0] -= 103.939
+        img[:, :, 1] -= 116.779
+        img[:, :, 2] -= 123.68
     return img
 
 def load_image(img_file, img_reshape_size):
@@ -179,22 +180,28 @@ if __name__ == '__main__':
     
     # Create and compile model
     model = create_VGG16_model(n_layers_train=n_layers_train, learning_rate=learning_rate)
-
-    # Tensorboard logs
+    
+    # Callbacks:
+    ##  Tensorboard logs
     tensorboard_log_dir='VGG16_lr'+str(learning_rate)+'_train'+str(n_layers_train)+'_epochs'+str(n_epoch)+'_data_aug'+str(data_augmentation)
 
-    tbCallBack = callbacks.TensorBoard(log_dir=os.path.join('Graph', tensorboard_log_dir),
+    tb_callback = callbacks.TensorBoard(log_dir=os.path.join('Graph', tensorboard_log_dir),
                                        histogram_freq=0, 
                                        write_graph=True, 
                                        write_images=False)
-
+    ##  Early stopping
+    earlystop = callbacks.EarlyStopping(monitor='val_loss', patience=2, \
+                              verbose=1, mode='auto')
+    ## MLFlow
+    mlflow_callback = LogMlFlowMetrics()
+    
     # Fit the model on batches with real-time data augmentation:
     model_history = model.fit_generator(train_generator,
                                         validation_data=(X_val, y_val),
                                         shuffle=True,
                                         epochs=n_epoch,
                                         steps_per_epoch=np.ceil(X_train.shape[0]//batch_size),
-                                        callbacks=[tbCallBack, LogMlFlowMetrics()],
+                                        callbacks=[tb_callback, earlystop, mlflow_callback],
                                         verbose=1,
                                         use_multiprocessing=True)
     
