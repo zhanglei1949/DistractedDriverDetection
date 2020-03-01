@@ -1,3 +1,13 @@
+# Federated Distracted drive detection
+
+Part of the code is from [cyril-p/DistractedDriverDetection](https://github.com/cyril-p/DistractedDriverDetection). 
+
+Current progress:
+- model update broken down into gradient calculation and update
+
+TODO
+- Simulate federated learning
+
 # DistractedDriverDetection
 Deep Learning and Computer Vision to detect distracted drivers
 
